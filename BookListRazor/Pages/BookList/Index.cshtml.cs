@@ -11,18 +11,33 @@ namespace BookListRazor.Pages.BookList
 {
     public class IndexModel : PageModel
     {
-        private readonly ApplicationDbContext applicationDbContext;
+        private readonly ApplicationDbContext _applicationDbContext;
 
         public IndexModel(ApplicationDbContext dbContext)
         {
-            applicationDbContext = dbContext;
+            _applicationDbContext = dbContext;
         }
 
         public IEnumerable<Book> Books { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task OnGet()
         {
-            Books = await applicationDbContext.Book.ToListAsync();
+            Books = await _applicationDbContext.Book.ToListAsync();
+        }
+
+        public async Task<IActionResult> OnPostDelete(int id)
+        {
+            var book = await _applicationDbContext.Book.FindAsync(id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            _applicationDbContext.Book.Remove(book);
+            await _applicationDbContext.SaveChangesAsync();
+
+            return RedirectToPage("Index");
         }
     }
 }
